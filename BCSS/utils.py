@@ -33,6 +33,7 @@ class DataSeq(tf.keras.utils.Sequence):
             images.append(image)
             
         images = np.array(images)
+        labels_batch = np.array(labels_batch)
 
         return images, labels_batch
 
