@@ -57,4 +57,14 @@ def load_ids(path):
     labels = np.array(labels) - 1
     labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy()
 
-    return ids, labels_onehot 
+    return ids, labels_onehot
+
+
+def load_pickle_mv(pkl_path, images_path):
+    df = pd.read_pickle(pkl_path)
+    ids = [os.path.join(images_path, str(label), patch) for patch, label in zip(df["patch"], df["label"])]
+    ids = np.array(ids)
+    labels = df["mv"] - 1
+    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy()
+    return ids, labels_onehot
+    
