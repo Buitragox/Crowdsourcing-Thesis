@@ -68,7 +68,7 @@ def load_ids(path):
 def load_pickle_mv(pkl_path, images_path):
     """Load mv.pkl and prepare the image paths and labels"""
     df = pd.read_pickle(pkl_path)
-    ids = [os.path.join(images_path, str(label), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
+    ids = [os.path.join(images_path, str(int(label)), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
     ids = np.array(ids)
     labels = df["mv"] - 1 # -1 so labels start at 0
     labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy() #majority voting labels
@@ -80,7 +80,7 @@ def load_pickle_ma(pkl_path, images_path, R):
     Annotator IDs go from 5 to 24, so R = 20 (amount of annotators)
     """
     df = pd.read_pickle(pkl_path)
-    ids = [os.path.join(images_path, str(label), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
+    ids = [os.path.join(images_path, str(int(label)), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
 
     N = len(df)
     labels = [[-1 for _ in range(R)] for _ in range(N)]
