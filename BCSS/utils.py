@@ -45,8 +45,13 @@ class DataSeq(tf.keras.utils.Sequence):
 
 
 def load_ids(path):
-    ids = []
-    labels = []
+    """
+    Search the image folder and get the paths and onehot labels for all images.
+    There should be a folder for each class. Ej: images/1/, images/2/, images/3/
+    """
+    
+    ids = [] #paths for each image
+    labels = [] #onehot labels 
     
     for root, dirs, files in os.walk(path):
         for i in range(len(files)):
@@ -61,10 +66,33 @@ def load_ids(path):
 
 
 def load_pickle_mv(pkl_path, images_path):
+    """Load mv.pkl and prepare the image paths and labels"""
     df = pd.read_pickle(pkl_path)
-    ids = [os.path.join(images_path, str(label), patch) for patch, label in zip(df["patch"], df["label"])]
+    ids = [os.path.join(images_path, str(label), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
     ids = np.array(ids)
-    labels = df["mv"] - 1
-    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy()
+    labels = df["mv"] - 1 # -1 so labels start at 0
+    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy() #majority voting labels
     return ids, labels_onehot
-    
+
+def load_pickle_ma(pkl_path, images_path, R):
+    """
+    Load train_crowdsourced_labels.pkl and prepare the image paths and labels for multiple annotators
+    Annotator IDs go from 5 to 24, so R = 20 (amount of annotators)
+    """
+    df = pd.read_pickle(pkl_path)
+    ids = [os.path.join(images_path, str(label), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
+
+    N = len(df)
+    labels = [[-1 for _ in range(R)] for _ in range(N)]
+    id_offset = 5
+    for i in range(N):
+        annotations = df["annotations"][i]
+        for ann in annotations:
+            ann_id = int(ann[0]) - id_offset
+            ann_data = ann[1] - 1
+            labels[i][ann_id] = ann_data
+
+    ids = np.array(ids)
+    labels = np.array(labels)
+
+    return ids, labels

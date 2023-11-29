@@ -1,1 +1,5 @@
 .ipynb_checkpoints
+*.h5
+Test/
+Train_non_experts_simple/
+
