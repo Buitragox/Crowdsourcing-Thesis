@@ -1,5 +1,6 @@
 from itertools import product
 import numpy as np
+import json
 
 
 def run_train_test(X_train, labels, X_test, Y_test, build_func, 
@@ -95,3 +96,12 @@ def show_results(exp_histories, exp_reports, K):
         print(f'\tstd f1 scores: {std_f1_scores}')
         print(f'\tmean accuracy: {mean_accuracy}')
         print(f'\tstd accuracy: {std_accuracy}')
+
+
+def save_to_json(path, exp_histories, exp_reports, history_name, report_name):
+    """Save results from grid_search to json"""
+    with open(f'{path}/{history_name}', 'w') as fp:
+        json.dump(exp_histories, fp)
+
+    with open(f'{path}/{report_name}', 'w') as fp:
+        json.dump(exp_reports, fp)
