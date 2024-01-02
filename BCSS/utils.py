@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import skimage.io as io
+from sklearn.utils import shuffle
 import os
 
 class DataSeq(tf.keras.utils.Sequence):
@@ -127,3 +128,30 @@ def load_labels_ma(pkl_path, R):
     labels = np.array(labels)
 
     return labels
+
+
+def load_npy_data(npy_path):
+    """"Load Train and Test data from npy data format"""
+    X_train = np.load(f'{npy_path}/TrainData.npy')
+    X_test = np.load(f'{npy_path}/TestData.npy')
+    Y_test = np.load(f'{npy_path}/TestLabels.npy')
+
+    return X_train, X_test, Y_test
+
+def load_ma_data(npy_path, pkl_path, R, min_two_ann=True):
+    """Load data from multiple annotators"""
+    labels = load_labels_ma(pkl_path, R)
+    X_train, X_test, Y_test = load_npy_data(npy_path)
+
+    # If min_two_ann=True, use data with at least 2 annotations
+    if min_two_ann:
+        i_ann = np.where(labels != -1, 1, 0)
+
+        sum_i_ann = np.sum(i_ann, axis=1)
+        i_ma = np.where(sum_i_ann >= 2, 1, 0)
+
+        X_train = X_train[i_ma == 1,:]
+        labels = labels[i_ma == 1,:]
+
+    X_train, labels = shuffle(X_train, labels, random_state=42)
+    return X_train, labels, X_test, Y_test
