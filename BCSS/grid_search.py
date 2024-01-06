@@ -4,18 +4,20 @@ import json
 
 
 def run_train_test(X_train, labels, X_test, Y_test, build_func, 
-                   evaluate_func, epochs=25, batch_size=8, **parameters):
+                   evaluate_func, epochs=25, batch_size=8, validation_split=0.0, 
+                   **parameters):
     """
     Train and test the model.
     """
     model = build_func(**parameters)
-    history = model.fit(X_train, labels, batch_size=batch_size, epochs=epochs)
+    history = model.fit(X_train, labels, validation_split=validation_split, batch_size=batch_size, epochs=epochs)
     report = evaluate_func(model, X_test, Y_test)
     return history.history, report
 
 
 def repeat_train_test(X_train, labels, X_test, Y_test, build_func, 
-                      evaluate_func, repeat=10, epochs=25, batch_size=8, **build_kwargs):
+                      evaluate_func, repeat=10, epochs=25, batch_size=8, 
+                      validation_split=0.0, **build_kwargs):
     """
     Train and test the model "repeat" amount of times.
     """
@@ -25,7 +27,8 @@ def repeat_train_test(X_train, labels, X_test, Y_test, build_func,
         print(f'Run #{j + 1}')
         history, report = run_train_test(X_train, labels, X_test, Y_test,
                                          build_func, evaluate_func, epochs=epochs, 
-                                         batch_size=batch_size, **build_kwargs)
+                                         batch_size=batch_size, validation_split=validation_split, 
+                                         **build_kwargs)
         run_history.append(history)
         run_report.append(report)
 
@@ -33,7 +36,8 @@ def repeat_train_test(X_train, labels, X_test, Y_test, build_func,
 
 
 def grid_search(X_train, labels, X_test, Y_test, build_func, 
-                evaluate_func, repeat=10, epochs=25, batch_size=8, **build_kwargs):
+                evaluate_func, repeat=10, epochs=25, batch_size=8, 
+                validation_split=0.0, **build_kwargs):
     """
     Train and test the model for each combination of build parameters "repeat" amount of times. 
     """
@@ -44,7 +48,8 @@ def grid_search(X_train, labels, X_test, Y_test, build_func,
     if len(key_args) == 0:
         run_history, run_report = repeat_train_test(X_train, labels, X_test, Y_test,
                                                     build_func, evaluate_func, epochs=epochs, 
-                                                    repeat=repeat, batch_size=batch_size)
+                                                    repeat=repeat, batch_size=batch_size, 
+                                                    validation_split=validation_split)
         exp_histories.append({"args": {}, "histories": run_history})
         exp_reports.append({"args": {}, "reports": run_report})
 
@@ -57,7 +62,8 @@ def grid_search(X_train, labels, X_test, Y_test, build_func,
 
             run_history, run_report = repeat_train_test(X_train, labels, X_test, Y_test,
                                                         build_func, evaluate_func, repeat=repeat, 
-                                                        epochs=epochs, batch_size=batch_size, **kwargs)
+                                                        epochs=epochs, batch_size=batch_size, 
+                                                        validation_split=validation_split, **kwargs)
 
             exp_histories.append({"args": kwargs, "histories": run_history})
             exp_reports.append({"args": kwargs, "reports": run_report})
