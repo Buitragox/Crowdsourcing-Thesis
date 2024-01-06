@@ -66,8 +66,24 @@ def load_ids(path):
     return ids, labels_onehot
 
 
+def load_labels_gold(pkl_path):
+    """Read train_crowdsourced_labels.pkl and get the gold labels with onehot encoding"""
+    df = pd.read_pickle(pkl_path)
+    labels = df["label"] - 1 # -1 so labels start at 0
+    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy()
+    return labels_onehot
+
+
+def load_labels_mv(pkl_path):
+    """Read mv.pkl and get the annotations"""
+    df = pd.read_pickle(pkl_path)
+    labels = df["mv"] - 1 # -1 so labels start at 0
+    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy() #majority voting labels
+    return labels_onehot
+
+
 def load_pickle_mv(pkl_path, images_path):
-    """Load mv.pkl and prepare the image paths and labels"""
+    """Read mv.pkl and prepare the image paths and labels"""
     df = pd.read_pickle(pkl_path)
     ids = [os.path.join(images_path, str(int(label)), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
     ids = np.array(ids)
@@ -76,17 +92,9 @@ def load_pickle_mv(pkl_path, images_path):
     return ids, labels_onehot
 
 
-def load_labels_mv(pkl_path):
-    """Load mv.pkl and get the annotations"""
-    df = pd.read_pickle(pkl_path)
-    labels = df["mv"] - 1 # -1 so labels start at 0
-    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy() #majority voting labels
-    return labels_onehot
-
-
 def load_labels_ma(pkl_path, R):
     """
-    Load train_crowdsourced_labels.pkl and prepare the image paths and labels for multiple annotators
+    Read train_crowdsourced_labels.pkl and prepare the image paths and labels for multiple annotators
     Annotator IDs go from 5 to 24, so R = 20 (amount of annotators)
     """
     df = pd.read_pickle(pkl_path)
@@ -108,7 +116,7 @@ def load_labels_ma(pkl_path, R):
 
 def load_pickle_ma(pkl_path, images_path, R):
     """
-    Load train_crowdsourced_labels.pkl and prepare the image paths and labels for multiple annotators
+    Read train_crowdsourced_labels.pkl and prepare the image paths and labels for multiple annotators
     Annotator IDs go from 5 to 24, so R = 20 (amount of annotators)
     """
     df = pd.read_pickle(pkl_path)
@@ -128,8 +136,16 @@ def load_npy_data(npy_path):
     return X_train, X_test, Y_test
 
 
+def load_gold_data(npy_path, pkl_path):
+    """Load gold standard data and apply shuffle"""
+    labels = load_labels_gold(pkl_path)
+    X_train, X_test, Y_test = load_npy_data(npy_path)
+    X_train, labels = shuffle(X_train, labels, random_state=42)
+    return X_train, labels, X_test, Y_test
+
+
 def load_ma_data(npy_path, pkl_path, R, min_two_ann=True):
-    """Load data from multiple annotators"""
+    """Load data from multiple annotators and apply shuffle"""
     labels = load_labels_ma(pkl_path, R)
     X_train, X_test, Y_test = load_npy_data(npy_path)
 
