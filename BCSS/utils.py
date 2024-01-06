@@ -87,8 +87,7 @@ def load_pickle_mv(pkl_path, images_path):
     df = pd.read_pickle(pkl_path)
     ids = [os.path.join(images_path, str(int(label)), patch) for patch, label in zip(df["patch"], df["label"])] #paths for each image
     ids = np.array(ids)
-    labels = df["mv"] - 1 # -1 so labels start at 0
-    labels_onehot = tf.one_hot(labels, 3, on_value=1.0, off_value=0.0).numpy() #majority voting labels
+    labels_onehot = load_labels_mv(pkl_path)
     return ids, labels_onehot
 
 
@@ -137,15 +136,23 @@ def load_npy_data(npy_path):
 
 
 def load_gold_data(npy_path, pkl_path):
-    """Load gold standard data and apply shuffle"""
+    """Load gold standard data from npy files and apply shuffle"""
     labels = load_labels_gold(pkl_path)
     X_train, X_test, Y_test = load_npy_data(npy_path)
     X_train, labels = shuffle(X_train, labels, random_state=42)
     return X_train, labels, X_test, Y_test
 
 
+def load_mv_data(npy_path, pkl_path):
+    """Load majority voting data from npy files and apply shuffle"""
+    labels = load_labels_mv(pkl_path)
+    X_train, X_test, Y_test = load_npy_data(npy_path)
+    X_train, labels = shuffle(X_train, labels, random_state=42)
+    return X_train, labels, X_test, Y_test
+
+
 def load_ma_data(npy_path, pkl_path, R, min_two_ann=True):
-    """Load data from multiple annotators and apply shuffle"""
+    """Load multiple annotator data from npy files and apply shuffle"""
     labels = load_labels_ma(pkl_path, R)
     X_train, X_test, Y_test = load_npy_data(npy_path)
 
