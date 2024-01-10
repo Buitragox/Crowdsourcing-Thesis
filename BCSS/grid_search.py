@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
 import json
+import os
 
 def save_to_json(exp_histories: list[dict], exp_reports: list[dict], 
                  history_path: str, report_path: str):
@@ -65,7 +66,7 @@ def grid_search(X_train, labels, X_test, Y_test, build_func,
     exp_histories = [] #histories of each experiment
     exp_reports = [] #reports of each experiment
 
-    if report_path != "" and history_path != "":
+    if report_path != "" and history_path != "" and os.path.exists(report_path):
         exp_histories, exp_reports = load_json(history_path, report_path)
 
     if len(key_args) == 0:
@@ -75,6 +76,8 @@ def grid_search(X_train, labels, X_test, Y_test, build_func,
                                                     validation_split=validation_split)
         exp_histories.append({"args": {}, "histories": run_history})
         exp_reports.append({"args": {}, "reports": run_report})
+
+        save_to_json(exp_histories, exp_reports, history_path, report_path)
 
     else:
         args_combinations = product(*build_kwargs.values())
@@ -100,8 +103,6 @@ def grid_search(X_train, labels, X_test, Y_test, build_func,
             exp_reports.append({"args": kwargs, "reports": run_report})
 
             save_to_json(exp_histories, exp_reports, history_path, report_path)
-
-
 
     return exp_histories, exp_reports
 
