@@ -16,6 +16,8 @@ The final data used for the training of the models of this work can be found in 
 
 - npy files can be read using [numpy.load](https://numpy.org/doc/stable/reference/generated/numpy.load.html)
 
+- `utils.py` has functions for loading npy files with their corresponding labels.
+
 In `/data/pkl` you can find the pickle (.pkl) files for majority voting and crowdsourced labels. These files have the annotations and labels.
 
 - pkl files can be read using [pandas.read_pickle](https://pandas.pydata.org/docs/reference/api/pandas.read_pickle.html).
